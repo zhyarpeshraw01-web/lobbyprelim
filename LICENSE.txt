@@ -1,0 +1,5 @@
+Copyright (c) 2026 Zhyar Peshraw Azeez. All rights reserved.
+
+The design, renders, drawings and the board in this repository are the author's academic work
+(Department of Architecture, Salahaddin University). You may view and share the link to the
+published page. Please ask the author before copying, modifying or reusing the images or design.

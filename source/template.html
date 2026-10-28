@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#0a2b28">
+<meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes">
+<meta name="description" content="Sculpted Rhythm — The Flowing Garden. An interactive 3D viewer of a 5-star hotel front desk and lounge by Zhyar Peshraw Azeez, Salahaddin University.">
+<meta property="og:title" content="Sculpted Rhythm — Inside the Reception"><meta property="og:description" content="Step inside the design: your renders in 3D, plus a 360° look-around.">/*OG*/
+<link rel="icon" href="/*ICON*/">
+<title>Sculpted Rhythm — Inside the Reception</title>
+<style>
+/*FONTS*/
+:root{--green:#123e38;--green2:#0a2b28;--cream:#f4f1e9;--tan:#b6a07a}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden;background:#0a2b28;font-family:'Poppins',system-ui,sans-serif;color:var(--cream);user-select:none;-webkit-user-select:none}
+#c{position:fixed;inset:0;width:100%;height:100%;display:block;cursor:grab;touch-action:none}
+#c.drag{cursor:grabbing}
+#loader{position:fixed;inset:0;z-index:50;background:radial-gradient(120% 100% at 30% 20%,#164a43,#0a2b28);display:flex;flex-direction:column;justify-content:center;padding:0 9vw;transition:opacity 1.2s ease,visibility 1.2s;gap:10px}
+#loader.done{opacity:0;visibility:hidden;pointer-events:none}
+.ld-title{font-family:'Lora',serif;font-size:clamp(44px,8vw,110px);line-height:.98;font-weight:400}
+.ld-sub{letter-spacing:.55em;font-size:clamp(10px,1.2vw,14px);color:var(--tan);margin-bottom:26px}
+.ld-bar{width:min(320px,60vw);height:2px;background:rgba(244,241,233,.15);overflow:hidden;border-radius:2px}
+.ld-bar i{display:block;height:100%;width:40%;background:var(--tan);animation:ld 1.4s ease-in-out infinite}
+@keyframes ld{0%{transform:translateX(-100%)}100%{transform:translateX(260%)}}
+.ld-note{font-size:11px;color:rgba(244,241,233,.55);letter-spacing:.08em}
+#hud{position:fixed;inset:0;pointer-events:none;z-index:10}
+#hud>*{pointer-events:auto}
+#brand{position:absolute;left:26px;top:20px;pointer-events:none;text-shadow:0 1px 14px rgba(0,0,0,.55)}
+#brand .t{font-family:'Lora',serif;font-size:26px;line-height:1.02}
+#brand .s{font-size:9.5px;letter-spacing:.42em;color:var(--tan);margin-top:6px}
+#brand .u{font-size:10px;color:rgba(244,241,233,.75);margin-top:10px}
+#minimap{position:absolute;right:20px;top:18px;width:210px;padding:8px 8px 6px;border-radius:14px;background:rgba(244,241,233,.9);color:var(--green);box-shadow:0 8px 28px rgba(0,0,0,.28)}
+#minimap canvas{width:100%;display:block;cursor:pointer}
+#minimap .cap{font-size:8.5px;letter-spacing:.3em;font-weight:600;margin:2px 4px 0}
+#where{position:absolute;left:26px;bottom:140px;pointer-events:none;text-shadow:0 2px 20px rgba(0,0,0,.6)}
+#where .tag{font-size:10.5px;letter-spacing:.34em;color:var(--tan);font-weight:600}
+#where .title{font-family:'Lora',serif;font-size:clamp(26px,3.6vw,40px);line-height:1.05;margin-top:6px}
+#where .hint{font-size:12px;margin-top:10px;color:rgba(244,241,233,.8);transition:opacity 1s}
+#hotspots{position:absolute;inset:0;pointer-events:none}
+.hs{position:absolute;left:0;top:0;display:none;align-items:center;gap:8px;background:none;border:0;color:var(--cream);cursor:pointer;pointer-events:auto;font:600 9.5px 'Poppins';letter-spacing:.26em;will-change:transform}
+.hs i{width:22px;height:22px;border-radius:50%;border:1.5px solid var(--cream);background:rgba(18,62,56,.55);position:relative;animation:pulse 2.2s infinite}
+.hs i:after{content:'';position:absolute;inset:6px;border-radius:50%;background:var(--cream)}
+.hs span{background:rgba(10,43,40,.7);padding:4px 9px;border-radius:20px;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);white-space:nowrap;border:1px solid rgba(182,160,122,.25)}
+.hs:hover span{background:var(--tan);color:var(--green2)}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(244,241,233,.5)}70%{box-shadow:0 0 0 12px rgba(244,241,233,0)}100%{box-shadow:0 0 0 0 rgba(244,241,233,0)}}
+#card{position:absolute;right:20px;bottom:140px;width:min(330px,86vw);padding:18px 20px;border-radius:16px;background:rgba(10,43,40,.8);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid rgba(182,160,122,.3);opacity:0;transform:translateY(12px);visibility:hidden;transition:all .4s}
+#card.show{opacity:1;transform:none;visibility:visible}
+#card .tag{font-size:10px;letter-spacing:.34em;color:var(--tan);font-weight:600}
+#card .title{font-family:'Lora',serif;font-size:24px;margin:6px 0 8px}
+#card .text{font-size:12.5px;line-height:1.6;color:rgba(244,241,233,.9)}
+#card button{position:absolute;right:12px;top:8px;background:none;border:0;color:var(--cream);font-size:22px;cursor:pointer;opacity:.7}
+#bar{position:absolute;left:50%;bottom:18px;transform:translateX(-50%);display:flex;flex-wrap:wrap;gap:10px;justify-content:center;max-width:96vw}
+.grp{display:flex;gap:4px;padding:5px;border-radius:40px;background:rgba(10,43,40,.74);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid rgba(182,160,122,.28);box-shadow:0 10px 30px rgba(0,0,0,.3);align-items:center}
+.grp button{font:500 11.5px 'Poppins';letter-spacing:.04em;color:var(--cream);background:none;border:0;border-radius:30px;padding:8px 14px;cursor:pointer;transition:all .2s;white-space:nowrap}
+.grp button:hover{background:rgba(244,241,233,.14)}
+.grp button.on{background:var(--cream);color:var(--green2);font-weight:600}
+.grp button.th{display:flex;align-items:center;gap:8px;padding:4px 14px 4px 4px}
+.grp button.th img{width:38px;height:38px;border-radius:50%;object-fit:cover;display:block}
+#help{position:absolute;left:50%;top:50%;transform:translate(-50%,-46%);width:min(440px,90vw);padding:22px 26px;border-radius:18px;background:rgba(10,43,40,.9);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(182,160,122,.3);opacity:0;visibility:hidden;transition:all .35s}
+#help.show{opacity:1;visibility:visible;transform:translate(-50%,-50%)}
+#help h3{font-family:'Lora',serif;font-weight:400;font-size:24px;margin-bottom:4px}
+#help p.s{font-size:10px;letter-spacing:.3em;color:var(--tan);margin-bottom:14px}
+#help table{width:100%;border-collapse:collapse;font-size:12.5px}
+#help td{padding:5px 0;vertical-align:top;color:rgba(244,241,233,.9)}
+#help td:first-child{width:36%;color:var(--tan);font-weight:600}
+#help .x{margin-top:12px;font-size:10.5px;color:rgba(244,241,233,.55)}
+#flash{position:fixed;inset:0;background:#fff;opacity:0;pointer-events:none;z-index:40;transition:opacity .5s}
+
+html,body{overscroll-behavior:none;touch-action:none}
+.grp button,#card button,.hs{touch-action:manipulation}
+.grp button.th span{display:inline}
+.grp button .s{display:none}
+#lite{position:fixed;inset:0;display:none;overflow:hidden;background:#0a2b28}
+#lite img{position:absolute;left:-4%;top:-4%;width:108%;height:108%;object-fit:cover;transition:opacity .6s,transform .2s ease-out;will-change:transform}
+#err{position:fixed;inset:0;z-index:60;display:none;align-items:center;justify-content:center;flex-direction:column;gap:14px;padding:30px;text-align:center;background:rgba(10,43,40,.96);font-size:14px;line-height:1.5}
+#err button{font:600 13px 'Poppins';padding:10px 22px;border-radius:30px;border:0;background:var(--cream);color:var(--green2);cursor:pointer}
+@media (max-width:820px),(pointer:coarse){
+ #brand{left:calc(14px + env(safe-area-inset-left));top:calc(12px + env(safe-area-inset-top))}
+ #brand .t{font-size:19px}#brand .s{font-size:8px;margin-top:4px}#brand .u{display:none}
+ #minimap{width:104px;right:calc(10px + env(safe-area-inset-right));top:calc(10px + env(safe-area-inset-top));padding:5px 5px 3px;border-radius:10px}#minimap .cap{display:none}
+ #where{left:calc(14px + env(safe-area-inset-left));top:calc(62px + env(safe-area-inset-top));bottom:auto;right:130px}
+ #where .title{font-size:25px}#where .hint{font-size:11px;margin-top:6px}#where .tag{font-size:9px}
+ #bar{bottom:calc(10px + env(safe-area-inset-bottom));gap:6px;max-width:100vw;padding:0 8px}
+ .grp{padding:3px}.grp button{padding:8px 11px;font-size:11px}
+ .grp button.th{padding:3px}.grp button.th span{display:none}.grp button.th img{width:36px;height:36px}
+ #g-mode .l{display:none}#g-mode .s{display:inline}
+ #b-full{display:none}
+ #card{left:calc(12px + env(safe-area-inset-left));right:calc(12px + env(safe-area-inset-right));width:auto;bottom:calc(148px + env(safe-area-inset-bottom));max-height:38vh;overflow:auto;padding:14px 16px}
+ #card .title{font-size:21px}#card .text{font-size:12.5px}
+ .hs{gap:6px;font-size:8.5px}.hs i{width:26px;height:26px}.hs i:after{inset:8px}.hs span{padding:3px 7px}
+ #help{padding:18px 18px}
+}
+@media (max-height:520px){
+ #minimap,#where .hint{display:none}#brand .s{display:none}
+ #bar{flex-wrap:nowrap;overflow-x:auto;justify-content:flex-start;bottom:calc(6px + env(safe-area-inset-bottom));scrollbar-width:none}#bar::-webkit-scrollbar{display:none}
+ #bar>.grp{flex:none}
+ #where{top:44px}#card{bottom:62px;max-height:50vh;left:auto;right:12px;width:min(320px,60vw)}
+}
+@media (min-width:821px) and (pointer:fine){#bar{flex-wrap:wrap}}
+</style>
+</head>
+<body>
+<div id="loader"><div class="ld-title">Sculpted<br>Rhythm</div><div class="ld-sub">THE FLOWING GARDEN</div><div class="ld-bar"><i></i></div><div class="ld-note" id="ld-note">Opening the reception&hellip;</div></div>
+<canvas id="c"></canvas>
+<div id="lite"><img id="lite-img" alt=""></div>
+<div id="err"><div id="err-t"></div><button id="err-b">Reload</button></div>
+<div id="flash"></div>
+<div id="hud">
+  <div id="brand"><div class="t">Sculpted Rhythm</div><div class="s">THE FLOWING GARDEN</div><div class="u">5-star hotel &middot; front desk + lounge<br>Zhyar Peshraw Azeez &middot; Salahaddin University</div></div>
+  <div id="minimap"><canvas id="map" width="440" height="400"></canvas><div class="cap">PLAN &middot; TAP A CAMERA</div></div>
+  <div id="hotspots"></div>
+  <div id="where"><div class="tag" id="w-tag"></div><div class="title" id="w-title"></div><div class="hint" id="w-hint">Move the mouse to look into the render &middot; drag to pan</div></div>
+  <div id="card"><button id="card-x" aria-label="Close">&times;</button><div class="tag" id="card-tag"></div><div class="title" id="card-title"></div><div class="text" id="card-text"></div></div>
+  <div id="help"><h3>Step inside your renders</h3><p class="s">HOW IT WORKS</p>
+    <table>
+      <tr><td>3D depth</td><td>Move the mouse (or tilt your phone) and the real render shifts in depth, like leaning inside the room</td></tr>
+      <tr><td>Pan / zoom</td><td>Drag to pan &middot; scroll or pinch to zoom</td></tr>
+      <tr><td>Views</td><td>C1, C2, C3 and the stone detail &mdash; or tap the camera dots on the plan</td></tr>
+      <tr><td>360&deg;</td><td>Switch to &ldquo;360&deg; around&rdquo; to look in every direction from the same spot (built from the 3D model)</td></tr>
+      <tr><td>Tour</td><td>Plays all renders one after another</td></tr>
+      <tr><td>Keys</td><td>1 2 3 4 view &middot; T tour &middot; L labels &middot; P photo &middot; F fullscreen &middot; H help</td></tr>
+    </table><div class="x">Works fully offline.</div></div>
+  <div id="bar">
+    <div class="grp" id="g-view"></div>
+    <div class="grp" id="g-mode"><button data-m="photo">Render</button><button data-m="pano"><span class="l">360&deg; around</span><span class="s">360&deg;</span></button></div>
+    <div class="grp" id="g-light" style="display:none"><button data-l="golden">Golden hour</button><button data-l="day">Day</button><button data-l="night">Night</button></div>
+    <div class="grp"><button id="b-auto">Tour</button><button id="b-gyro" style="display:none">Tilt</button><button id="b-hs">Labels</button><button id="b-shot">Photo</button><button id="b-full" class="t-fs">Full</button><button id="b-help">?</button></div>
+  </div>
+</div>
+<script>/*DATA*/</script>
+<script>/*JS*/</script>
+</body>
+</html>
